@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<routes xmlns="http://symfony.com/schema/routing"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://symfony.com/schema/routing http://symfony.com/schema/routing/routing-1.0.xsd">
+
+    <route id="advancedsearch.front.product.view-all" path="/view_all">
+        <default key="_controller">Thelia\Controller\Front\DefaultController::noAction</default>
+        <default key="_view">advancedsearch-view-all</default>
+    </route>
+
+    <!-- product ajax list -->
+    <route id="advancedsearch.front.product.ajax-list" path="/product/ajaxList">
+        <default key="_controller">AdvancedSearch\Controller\Front\ProductController::getListAjaxAction</default>
+    </route>
+
+</routes>

@@ -1,0 +1,31 @@
+{$url_nav="/view_all?feature_availability={$feature_availability_from_url}"}
+
+<div class="input-group">
+    <label for="advanced-search-link" class="input-group-addon">{intl l="Share this search by copying this link"} :</label>
+    <input id="advanced-search-link" type="text" class="form-control" value="{url path=$url_nav limit=$limit order=$product_order page=$product_page}">
+</div>
+
+<article class="col-main  {$smarty.get.mode|default:"grid"}"  role="main" aria-labelledby="main-label">
+
+    <h1 id="main-label" class="page-header">{if $product_type == "new"}{intl l="Latest products"}{elseif $product_type == "offers"}{intl l="Product Offers"}{/if}</h1>
+    {assign var="amount" value="{count type="product" feature_availability="{$feature_availability}" promo="{$product_type == "offers"}" new="{$product_type == "new"}"}"}
+    {include file="includes/advancedsearch-toolbar.html" toolbar="top" limit=$limit order=$product_order amount={$amount} url_nav="$url_nav"}
+    <div id="category-products">
+        <div class="products-content">
+            {ifloop rel="product_list"}
+            <ul class="product-col-3">
+                {loop type="product" feature_availability="{$feature_availability}" promo="{$product_type == "offers"}" new="{$product_type == "new"}" name="product_list" limit=$limit page=$product_page order=$product_order}
+                {include file="includes/single-product.html" product_id=$ID hasBtn=true hasDescription=true width="700" height="320"}
+                {/loop}
+            </ul>
+            {/ifloop}
+            {elseloop  rel="product_list"}
+            <h2 class="text-center">{intl l="No results found"} </h2>
+            {/elseloop}
+        </div>
+    </div><!-- /#category-products -->
+    {ifloop rel="product_list"}
+        {include file="includes/advancedsearch-toolbar.html" limit=$limit toolbar="bottom" amount={$amount} url_nav="$url_nav"}
+    {/ifloop}
+
+</article>

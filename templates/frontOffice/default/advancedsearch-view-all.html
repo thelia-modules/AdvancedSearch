@@ -1,0 +1,150 @@
+{extends file="layout.tpl"}
+
+{block name="body-class"}page-view-all{/block}
+
+{* Breadcrumb *}
+{block name='no-return-functions' append}
+    {$breadcrumbs = [
+    ['title' => {intl l="View all"}, 'url'=>{url path="/view_all"}]
+    ]}
+{/block}
+
+{block name="main-content"}
+<div class="main">
+
+    {* Do an array of feature list (separated by comma) to return which are checked *}
+    {assign var="feature_list" value=","|explode:$smarty.get.feature_availability}
+
+    {ifloop rel="features"}
+        <div class="well clearfix" id="advanced-search-engine">
+        {loop name="features" type="feature"}
+
+            {ifloop rel="feature-availability"}
+            <div class="feature-group col-lg-2">
+                <h3 class="feature-title" data-feature-id="{$ID}">{$TITLE}</h3>
+                <ul class="list-unstyled">
+                    {loop name="feature-availability" type="feature-availability" feature="$ID"}
+                    <li>
+                        <label for="feature-{$ID}">
+                            <input id="feature-{$ID}" type="checkbox" name="feature-availability[]" value="{$ID}" class="feature-values" {if in_array($ID, $feature_list)}checked="checked"{/if}/>
+                            {$TITLE}
+                        </label>
+                    </li>
+                    {/loop}
+                </ul>
+            </div>
+            {/ifloop}
+
+        {/loop}
+        </div>
+    {/ifloop}
+
+    {* Parameters *}
+    {$limit={$smarty.get.limit|default:8}}
+    {$product_page={$smarty.get.page|default:1}}
+    {$product_order={$smarty.get.order|default:'new'}}
+    {$product_type={$smarty.get.type|default:'new'}}
+    <div id="products-list">
+        {include file="ajax/product-list.html"}
+    </div>
+
+</div><!-- /.layout -->
+{/block}
+
+{block name="after-javascript-include"}{/block}
+
+{block name="javascript-initialization"}
+<script>
+    jQuery(function($){
+
+        // Redefine grid/list display mode switch (fix bug for ajax use)
+        var $loader = $('<div class="loader"></div>');
+        $('#content').on('click.view-mode', '[data-toggle=view]', function () {
+            var $category_products = $ ('#category-products');
+            var $parent = $category_products.parent();
+
+            if (($(this).hasClass('btn-grid') && $parent.hasClass('grid')) || ($(this).hasClass('btn-list') && $parent.hasClass('list'))) { return; }
+
+            // Add loader effect
+            $loader.show();
+            setTimeout(function () { $parent.toggleClass('grid').toggleClass('list'); $loader.hide(); }, 400);
+
+            return false;
+        });
+
+        {* if url contain feature_availability argument *}
+        {if $smarty.get.feature_availability}
+            reloadSearch();
+        {/if}
+
+        // When feature is checked/unchecked
+        $('.feature-values').on('change', function(){
+            reloadSearch();
+        });
+
+        // Reload search function
+        function reloadSearch(){
+
+            var searchArgs      = [],
+                url             = '',
+                url_friendly    = '';
+
+            $('.feature-group').each(function(){
+
+                var category = $('.feature-title', $(this)).data('feature-id');
+                var $checkedValues = $('.feature-values:checked', $(this));
+
+                var values = [];
+                $checkedValues.each(function(){
+                    values.push($(this).val());
+                });
+
+                var featureCouple = [];
+                featureCouple['feature-category'] = category;
+                featureCouple['feature-values'] = values;
+
+                searchArgs.push(featureCouple);
+
+            });
+
+            $.each(searchArgs, function(k, v){
+
+                var category        = v['feature-category'],
+                    values          = v['feature-values'].join("|"),
+                    values_friendly = v['feature-values'].join(",");
+
+                if(category != '' && values != ''){
+                    url += category + ":" + values + ",";
+                    url_friendly += values_friendly + ",";
+                }
+
+            });
+
+            // Delete the last comma
+            url             = url.substring(0,url.length-1);
+            url_friendly    = url_friendly.substring(0,url_friendly.length-1);
+
+            var limit   = "{$limit}",
+                page    = "{$product_page}",
+                order   = "{$product_order}",
+                type    = "{$product_type}";
+
+            $('#products-list').load(
+                '/product/ajaxList',
+                {literal}
+                    {
+                        limit: limit,
+                        page: page,
+                        order: order,
+                        type: type,
+                        feature_availability: url,
+                        feature_availability_from_url: url_friendly
+                    }
+                {/literal}
+            );
+
+        }
+
+    });
+</script>
+{/block}
