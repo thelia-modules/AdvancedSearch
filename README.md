@@ -10,7 +10,7 @@ You can download the .zip file of this module or create a git submodule into you
 
 ```
 cd /path-to-thelia
-git submodule add https://github.com/thelia-modules/advancedsearch.git local/modules/AdvancedSearch
+git submodule add https://github.com/thelia-modules/AdvancedSearch.git local/modules/AdvancedSearch
 ```
 
 Next, go to your Thelia admin panel for module activation.
